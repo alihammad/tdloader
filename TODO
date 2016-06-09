@@ -1,0 +1,15 @@
+Teradata Tool Pack
+ ☐ Download Code in files in the exact same hierarchy. Make DB as directory and object as file with extensions like .tbl for table and .vw for view .proc for procedure and .fun for function
+
+ ☐ Load tool: Load tables from source to target (study using tdload instead of TPT)
+     ☐ [src db name] [tgt db name] [obj name filter regex] [recursive T/F]
+     ☐ Read one table at a time. Get DDLs and export to a file
+     ☐ Read table columns for TPT schema
+     ☐  ... fast forward
+     ☐  Generate TPT script
+     ☐  Execute TPT script
+
+
+
+ ☐ Create exacct DB structure with slight change in db names like IPDatabase(prod) to IDSHARE(Dev) OR ITSHARE(Testing)
+
