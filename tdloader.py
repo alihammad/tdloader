@@ -26,21 +26,24 @@ __prog__ = "tdloader"
 
 class DB():
 	def __init__(self):
-		logging.basicConfig(filename='tdloader.log',
-						filemode='a',
-						format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-						datefmt='%H:%M:%S',
-						level=logging.DEBUG)
+		# logging.basicConfig(filename='tdloader.log',
+		# 				filemode='a',
+		# 				format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+		# 				datefmt='%H:%M:%S',
+		# 				level=logging.DEBUG)
 		
-		os.system('config.py')
-		from config import username, password, tdip
-		username = str(username)
-		password = str(password)
-		tdip = str(tdip)
-		print("TDIP: {0}, Username: {1}, Passwrod: {2}".format(tdip, username, password))
+		# os.system('config.py')
+		# from config import username, password, tdip
+		# username = str(username)
+		# password = str(password)
+		# tdip = str(tdip)
+		# print("TDIP: {0}, Username: {1}, Passwrod: {2}".format(tdip, username, password))
 
-		udaExec = teradata.UdaExec (appName="HelloWorld", version="1.0", logConsole=False)
-		session = udaExec.connect(method="odbc", system=tdip,username=username, password=password)
+		#udaExec = teradata.UdaExec (appName="HelloWorld", version="1.0", logConsole=False)
+		#session = udaExec.connect(method="odbc", system=tdip,username=username, password=password)
+		udaExec = teradata.UdaExec (appConfigFile="tdloader.ini")
+		logger = logging.getLogger(__name__)
+		session = udaExec.connect("${dataSourceName}")
 		self.session = session
 
 	def lookup_value(self):
@@ -54,7 +57,13 @@ class DB():
 		for row in self.session.execute(query):
 			print(row)
 
+	def get_db_hierarchy(self, parent_db):
+		rows = self.session.execute(file="${hierarchyQuery}")
+		for row in rows:
+			# print(row.ROUTE)
+			print(row['route'])
 		
 db = DB()
-db.lookup_value()
+# db.lookup_value()
 # print(value.result)
+db.get_db_hierarchy('gcfr_main')
