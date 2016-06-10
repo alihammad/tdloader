@@ -59,11 +59,13 @@ class DB():
 
 	def get_db_hierarchy(self, parent_db):
 		rows = self.session.execute(file="${hierarchyQuery}")
+		return rows
+	
+	def create_dirs(self, rows):
 		for row in rows:
-			# print(row.ROUTE)
-			print(row['route'])
-		
+			print(row.route)
+			os.makedirs(row.route, exist_ok=True)
+			
 db = DB()
-# db.lookup_value()
-# print(value.result)
-db.get_db_hierarchy('gcfr_main')
+rows = db.get_db_hierarchy('gcfr_main')
+db.create_dirs(rows)
