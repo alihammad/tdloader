@@ -97,10 +97,13 @@ class DB():
 		# More details: http://developer.teradata.com/tools/reference/teradata-python-module?page=3#comment-148872
 		rows = self.session.execute(show_stmt)
 		for row in rows:
-			for line in re.split("\r\n|\n\r|\r|\n", row[0]):
-				file.write(line)
+			# self.log.info("row:{0}".format(row[0]))
+			# for line in re.split("\r\n|\n\r|\r|\n", row[0]):
+				# self.log.info("line:{0}".format(line))
+				# file.write(line+"\n")
+			file.write(row[0])	
 		file.close()
-
+		
 # constructor
 db = DB()
 
