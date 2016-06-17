@@ -25,8 +25,8 @@ __prog__ = "tdloader"
 import logging
 import os
 import teradata
-import copy
-from datetime import datetime
+import re
+# from datetime import datetime
 
 class DB():
 	def __init__(self):
@@ -76,32 +76,41 @@ class DB():
 		
 
 	def get_db_obj_show_stmts(self, db):
-		shw_stmt= self.session.execute(file="${shwstmtQuery}", params=(db, )).fetchone()[0]
-		return shw_stmt
+		d = dict()
+		rows = self.session.execute(file="${shwstmtQuery}", params=(db, ))
+		for row in rows:
+			d[row[0]] = row[1]
+		
+		# print("------------------------DB: "+db.strip()+"-----------------------")
+		# print("DB:{0}\tFile:{1}\tStmt:{3}".format(db,filename, showstmt))
+		# print("---------------------------------------------------------")
 
-	def save_obj_ddl_in_file(self, db, filesystem_path, rs):
-		for row in rs:
-			file_path = filesystem_path+'/'+rs['filename']
-			show_stmt = rs['showstmt']
+		return d
 
-			self.log.info("file_path: {0},  show_stmt: {1}".format(file_path, show_stmt))
-			# ddl = self.session.execute(show_stmt)
-			# file = open(file_path, 'w+')
-			# file.write(ddl)
-			# file.close()
+	def save_obj_ddl_in_file(self, db, dir_path, filename, show_stmt):
+		file_path = dir_path + '/' + filename
+		file = open(file_path, 'w+')
 
-
+		# Due to some bug in Teradata Python module the show statement 
+		# does not return the entire statment which is because of the 
+		# new-line characters. To fix it, do the following
+		# More details: http://developer.teradata.com/tools/reference/teradata-python-module?page=3#comment-148872
+		rows = self.session.execute(show_stmt)
+		for row in rows:
+			for line in re.split("\r\n|\n\r|\r|\n", row[0]):
+				file.write(line)
+		file.close()
 
 # constructor
 db = DB()
+
 rs_db_hierarchy = tuple(db.get_db_hierarchy('gcfr_main'))
 db.create_dirs(rs_db_hierarchy)
-# rs_db_hierarchy gives databasename and route
-# rs_db_obj_show_stmt gives filename and show statement
+
 for row in rs_db_hierarchy:
 	db_name = row.databasename
-	filesystem_path = row.route
-	print("dbname: {0}, file path: {1}".format(db_name, filesystem_path))
-	rs_db_obj_show_stmt = db.get_db_obj_show_stmts(db_name)
-	print(rs_db_obj_show_stmt)
-	# db.save_obj_ddl_in_file(db_name, filesystem_path, rs_db_obj_show_stmt)
+	dir_path = row.route
+	d = db.get_db_obj_show_stmts(db_name)
+	for filename, show_stmt in d.items():
+		db.save_obj_ddl_in_file(db_name, dir_path, filename, show_stmt)
+
